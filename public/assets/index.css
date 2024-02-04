@@ -1,0 +1,47 @@
+.invoice {
+  display: grid;
+  box-sizing: border-box;
+  grid-template-areas:
+    "name name date"
+    "milk_lbl milk_lbl milk_amt"
+    "rate_lbl rate_lbl rate_amt"
+    "bill_lbl bill_lbl bill_amt"
+    "pending_lbl pending_lbl pending_amt"
+    "total_lbl total_lbl total_amt";
+}
+.name {
+  grid-area: name;
+}
+.date {
+  grid-area: date;
+}
+.milk_lbl {
+  grid-area: milk_lbl;
+}
+.milk_amt {
+  grid-area: milk_amt;
+}
+.rate_lbl {
+  grid-area: rate_lbl;
+}
+.rate_amt {
+  grid-area: rate_amt;
+}
+.bill_lbl {
+  grid-area: bill_lbl;
+}
+.bill_amt {
+  grid-area: bill_amt;
+}
+.pending_lbl {
+  grid-area: pending_lbl;
+}
+.pending_amt {
+  grid-area: pending_amt;
+}
+.total_lbl {
+  grid-area: total_lbl;
+}
+.total_amt {
+  grid-area: total_amt;
+}
