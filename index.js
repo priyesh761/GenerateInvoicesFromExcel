@@ -1,5 +1,5 @@
 const dataColumns = {
-  name: "NAMES",
+  name: "names",
   total_milk: "total milk",
   rate: "rate",
   bill: "bill",
@@ -41,18 +41,34 @@ async function handleFileAsync(e) {
   billData.forEach((element) => {
     const invoiceHtmlElement = document.createElement("div");
     invoiceHtmlElement.classList.add("invoice", "border", "border-1", "p-0", "col-5", "m-3");
-    const nameHtmlElement = generateTextDiv(element[dataColumns.name], ["name"]);
-    const dateHtmlElement = generateTextDiv(invoiceMonth, ["date"], true);
+    const nameHtmlElement = generateTextDiv(comparePropertyCaseInsensitive(element, dataColumns.name), ["name"], true);
+    const dateHtmlElement = generateTextDiv(invoiceMonth, ["date", "text-danger"], true);
     const milkQtHtmlElement = generateTextDiv("Total milk", ["border-bottom-0", "text-end", "milk_lbl"]);
-    const milkQtValHtmlElement = generateTextDiv(`${element[dataColumns.total_milk]} ltr`, ["border-bottom-0", "milk_amt"]);
+    const milkQtValHtmlElement = generateTextDiv(`${comparePropertyCaseInsensitive(element, dataColumns.total_milk)} ltr`, [
+      "border-bottom-0",
+      "milk_amt",
+    ]);
     const milkRateHtmlElement = generateTextDiv("Rate", ["border-top-0", "text-end", "rate_lbl"]);
-    const milkRateValHtmlElement = generateTextDiv(`₹ ${element[dataColumns.rate]}`, ["border-top-0", "rate_amt"]);
+    const milkRateValHtmlElement = generateTextDiv(`₹ ${comparePropertyCaseInsensitive(element, dataColumns.rate)}`, [
+      "border-top-0",
+      "rate_amt",
+    ]);
     const billTxtHtmlElement = generateTextDiv("Bill", ["border-bottom-0", "text-end", "bill_lbl"]);
-    const billValHtmlElement = generateTextDiv(`₹ ${element[dataColumns.bill]}`, ["border-bottom-0", "bill_amt"]);
+    const billValHtmlElement = generateTextDiv(`₹ ${comparePropertyCaseInsensitive(element, dataColumns.bill)}`, [
+      "border-bottom-0",
+      "bill_amt",
+    ]);
     const pendingTxtHtmlElement = generateTextDiv("Due amount", ["border-top-0", "text-end", "pending_lbl"]);
-    const pendingValHtmlElement = generateTextDiv(`₹ ${element[dataColumns.pending]}`, ["border-top-0", "pending_amt"]);
+    const pendingValHtmlElement = generateTextDiv(`₹ ${comparePropertyCaseInsensitive(element, dataColumns.pending)}`, [
+      "border-top-0",
+      "pending_amt",
+    ]);
     const totalTxtHtmlElement = generateTextDiv("Total", ["text-end", "total_lbl"], true);
-    const totalValHtmlElement = generateTextDiv(`₹ ${element[dataColumns.final]}`, ["total_amt"], true);
+    const totalValHtmlElement = generateTextDiv(
+      `₹ ${comparePropertyCaseInsensitive(element, dataColumns.final)}`,
+      ["total_amt", "text-danger"],
+      true
+    );
 
     invoiceHtmlElement.append(
       nameHtmlElement,
@@ -75,8 +91,9 @@ async function handleFileAsync(e) {
   printBtn.addEventListener("click", () => generatePdf(invoiceListHtml), { once: true });
 }
 
-function generatePdf(invoiceListHtml) {
-  html2pdf()
+async function generatePdf(invoiceListHtml) {
+  loadingState();
+  await html2pdf()
     .set({
       margin: [1, 5],
       filename: `Milk_Invoice_${date.toLocaleDateString()}_${date.toLocaleTimeString()}.pdf`,
@@ -90,6 +107,8 @@ function generatePdf(invoiceListHtml) {
     .save();
 
   fileInput.value = "";
+  datePicker.value = "";
+  enableState();
 }
 
 function generateTextDiv(content = "", classList = [], bold = false) {
@@ -102,3 +121,7 @@ function generateTextDiv(content = "", classList = [], bold = false) {
   return divElement;
 }
 
+function comparePropertyCaseInsensitive(obj, key) {
+  const keyValue = Object.keys(obj).find((currentKey) => currentKey.toLowerCase() === key.toLowerCase());
+  return keyValue && obj[keyValue];
+}
