@@ -1,3 +1,9 @@
+.invoice-page {
+  display: grid;
+  box-sizing: border-box;
+  grid-template-columns: 1fr 1fr;
+}
+
 .invoice {
   display: grid;
   box-sizing: border-box;

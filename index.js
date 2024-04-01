@@ -11,6 +11,7 @@ const printBtnText = printBtn.querySelector("#btnTxt");
 const printBtnSpinner = printBtn.querySelector("#btnLoading");
 const fileInput = document.querySelector("#xlFile");
 const datePicker = document.querySelector("#datePicker");
+const invoiceListHtml = document.querySelector("#contentToPrint");
 
 const date = new Date();
 enableState(true);
@@ -27,6 +28,7 @@ function loadingState() {
   printBtnSpinner.classList.remove("visually-hidden");
   printBtnText.classList.add("visually-hidden");
 }
+
 async function handleFileAsync(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -35,60 +37,79 @@ async function handleFileAsync(e) {
   const workbook = XLSX.read(data);
   const worksheet = workbook.Sheets[workbook.SheetNames[0]];
   const billData = XLSX.utils.sheet_to_json(worksheet);
-  const invoiceMonth = new Date(datePicker.value).toLocaleDateString("en-US", { year: "numeric", month: "short" });
-  const invoiceListHtml = document.querySelector("#contentToPrint2");
 
-  billData.forEach((element) => {
-    const invoiceHtmlElement = document.createElement("div");
-    invoiceHtmlElement.classList.add("invoice", "border", "border-1", "p-0", "col-5", "m-3");
-    const nameHtmlElement = generateTextDiv(comparePropertyCaseInsensitive(element, dataColumns.name), ["name"], true);
-    const dateHtmlElement = generateTextDiv(invoiceMonth, ["date", "text-danger"], true);
-    const milkQtHtmlElement = generateTextDiv("Total milk", ["border-bottom-0", "text-end", "milk_lbl"]);
-    const milkQtValHtmlElement = generateTextDiv(`${comparePropertyCaseInsensitive(element, dataColumns.total_milk)} ltr`, [
-      "border-bottom-0",
-      "milk_amt",
-    ]);
-    const milkRateHtmlElement = generateTextDiv("Rate", ["border-top-0", "text-end", "rate_lbl"]);
-    const milkRateValHtmlElement = generateTextDiv(`₹ ${comparePropertyCaseInsensitive(element, dataColumns.rate)}`, [
-      "border-top-0",
-      "rate_amt",
-    ]);
-    const billTxtHtmlElement = generateTextDiv("Bill", ["border-bottom-0", "text-end", "bill_lbl"]);
-    const billValHtmlElement = generateTextDiv(`₹ ${comparePropertyCaseInsensitive(element, dataColumns.bill)}`, [
-      "border-bottom-0",
-      "bill_amt",
-    ]);
-    const pendingTxtHtmlElement = generateTextDiv("Due amount", ["border-top-0", "text-end", "pending_lbl"]);
-    const pendingValHtmlElement = generateTextDiv(`₹ ${comparePropertyCaseInsensitive(element, dataColumns.pending)}`, [
-      "border-top-0",
-      "pending_amt",
-    ]);
-    const totalTxtHtmlElement = generateTextDiv("Total", ["text-end", "total_lbl"], true);
-    const totalValHtmlElement = generateTextDiv(
-      `₹ ${comparePropertyCaseInsensitive(element, dataColumns.final)}`,
-      ["total_amt", "text-danger"],
-      true
-    );
-
-    invoiceHtmlElement.append(
-      nameHtmlElement,
-      dateHtmlElement,
-      milkQtHtmlElement,
-      milkQtValHtmlElement,
-      milkRateHtmlElement,
-      milkRateValHtmlElement,
-      billTxtHtmlElement,
-      billValHtmlElement,
-      pendingTxtHtmlElement,
-      pendingValHtmlElement,
-      totalTxtHtmlElement,
-      totalValHtmlElement
-    );
-    invoiceListHtml.append(invoiceHtmlElement);
-  });
-
+  generateBillPage(billData).reduce((result, billPage) => {
+    result.appendChild(billPage);
+    return result;
+  }, invoiceListHtml);
   enableState();
   printBtn.addEventListener("click", () => generatePdf(invoiceListHtml), { once: true });
+}
+
+function generateBillPage(billPageData) {
+  return billPageData
+    .map((billData) => generateBill(billData))
+    .reduce((result, item, index) => {
+      const pageIndex = Math.floor(index / 8);
+      if (!result[pageIndex]) {
+        const page = document.createElement("div");
+        page.classList.add("invoice-page");
+        result[pageIndex] = page;
+      }
+      result[pageIndex].append(item);
+      return result;
+    }, []);
+}
+
+function generateBill(billData) {
+  const invoiceMonth = new Date(datePicker.value).toLocaleDateString("en-US", { year: "numeric", month: "short" });
+
+  const invoiceHtmlElement = document.createElement("div");
+  invoiceHtmlElement.classList.add("invoice", "border", "border-1", "p-0", "m-2");
+  const nameHtmlElement = generateTextDiv(comparePropertyCaseInsensitive(billData, dataColumns.name), ["name"], true);
+  const dateHtmlElement = generateTextDiv(invoiceMonth, ["date", "text-danger"], true);
+  const milkQtHtmlElement = generateTextDiv("Total milk", ["border-bottom-0", "text-end", "milk_lbl"]);
+  const milkQtValHtmlElement = generateTextDiv(`${comparePropertyCaseInsensitive(billData, dataColumns.total_milk)} ltr`, [
+    "border-bottom-0",
+    "milk_amt",
+  ]);
+  const milkRateHtmlElement = generateTextDiv("Rate", ["border-top-0", "text-end", "rate_lbl"]);
+  const milkRateValHtmlElement = generateTextDiv(`₹ ${comparePropertyCaseInsensitive(billData, dataColumns.rate)}`, [
+    "border-top-0",
+    "rate_amt",
+  ]);
+  const billTxtHtmlElement = generateTextDiv("Bill", ["border-bottom-0", "text-end", "bill_lbl"]);
+  const billValHtmlElement = generateTextDiv(`₹ ${comparePropertyCaseInsensitive(billData, dataColumns.bill)}`, [
+    "border-bottom-0",
+    "bill_amt",
+  ]);
+  const pendingTxtHtmlElement = generateTextDiv("Due amount", ["border-top-0", "text-end", "pending_lbl"]);
+  const pendingValHtmlElement = generateTextDiv(`₹ ${comparePropertyCaseInsensitive(billData, dataColumns.pending)}`, [
+    "border-top-0",
+    "pending_amt",
+  ]);
+  const totalTxtHtmlElement = generateTextDiv("Total", ["text-end", "total_lbl"], true);
+  const totalValHtmlElement = generateTextDiv(
+    `₹ ${comparePropertyCaseInsensitive(billData, dataColumns.final)}`,
+    ["total_amt", "text-danger"],
+    true
+  );
+
+  invoiceHtmlElement.append(
+    nameHtmlElement,
+    dateHtmlElement,
+    milkQtHtmlElement,
+    milkQtValHtmlElement,
+    milkRateHtmlElement,
+    milkRateValHtmlElement,
+    billTxtHtmlElement,
+    billValHtmlElement,
+    pendingTxtHtmlElement,
+    pendingValHtmlElement,
+    totalTxtHtmlElement,
+    totalValHtmlElement
+  );
+  return invoiceHtmlElement;
 }
 
 async function generatePdf(invoiceListHtml) {
@@ -97,7 +118,7 @@ async function generatePdf(invoiceListHtml) {
     .set({
       margin: [1, 5],
       filename: `Milk_Invoice_${date.toLocaleDateString()}_${date.toLocaleTimeString()}.pdf`,
-      pagebreak: { avoid: ".invoice" },
+      pagebreak: { avoid: ".invoice-page" },
       jsPDF: {
         orientation: "p",
         format: "a4",
