@@ -1,3 +1,7 @@
+.invoice-result {
+  width: 210mm;
+}
+
 .invoice-page {
   display: grid;
   box-sizing: border-box;
