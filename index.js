@@ -39,7 +39,7 @@ async function handleQrInput(e) {
   const qrFileReader = new FileReader();
   qrFileReader.addEventListener("load", () => {
     qrCodeDataUrl = qrFileReader.result;
-    fileInput.value = undefined;
+    fileInput.value = "";
   });
   qrFileReader.readAsDataURL(qrFile);
 }
@@ -149,9 +149,9 @@ async function generatePdf(invoiceListHtml) {
     .from(invoiceListHtml)
     .save();
 
-  qrInput.value = undefined;
-  fileInput.value = undefined;
-  datePicker.value = undefined;
+  qrInput.value = "";
+  fileInput.value = "";
+  datePicker.value = "";
   enableState();
 }
 

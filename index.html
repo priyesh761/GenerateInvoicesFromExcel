@@ -30,15 +30,16 @@
   </head>
   <body>
     <div class="container-sm">
-      <div class="row justify-content-center input-group align-items-center g-3 my-5">
-        <div class="col-2 mr-1">
+      <div class="row justify-content-center input-group align-items-end g-3 my-5">
+        <div class="col-12 col-md-2 mr-1">
+          <label class="form-label" for="datePicker">Date</label>
           <input class="form-control align-self-bottom" type="date" id="datePicker" name="date" />
         </div>
-        <div class="col-3 mr-1">
+        <div class="col-12 col-md-3 mr-1">
           <label class="form-label" for="qrCode">QR Code (Optional)</label>
           <input type="file" class="form-control" id="qrCode" accept="image/png, image/jpeg, image/jpg" />
         </div>
-        <div class="col-3 mr-1">
+        <div class="col-12 col-md-3 mr-1">
           <label class="form-label" for="xlFile">Excel file input</label>
           <input
             type="file"
@@ -47,7 +48,7 @@
             accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
           />
         </div>
-        <div class="col-2">
+        <div class="col-12 col-md-2">
           <button class="btn btn-primary" id="printBtn">
             <span id="btnTxt"><img class="text-light" src="./public/assets/printer.svg" alt="Print" /></span>
             <div id="btnLoading" class="spinner-border spinner-border-sm text-light visually-hidden" role="status">
