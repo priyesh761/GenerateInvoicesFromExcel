@@ -10,12 +10,15 @@ const printBtn = document.querySelector("#printBtn");
 const printBtnText = printBtn.querySelector("#btnTxt");
 const printBtnSpinner = printBtn.querySelector("#btnLoading");
 const fileInput = document.querySelector("#xlFile");
+const qrInput = document.querySelector("#qrCode");
 const datePicker = document.querySelector("#datePicker");
 const invoiceListHtml = document.querySelector("#contentToPrint");
+let qrCodeDataUrl = undefined;
 
 const date = new Date();
 enableState(true);
 fileInput.addEventListener("change", handleFileAsync, false);
+qrInput.addEventListener("change", handleQrInput);
 
 function enableState(disabled = false) {
   printBtn.disabled = disabled;
@@ -27,6 +30,18 @@ function loadingState() {
   printBtn.disabled = true;
   printBtnSpinner.classList.remove("visually-hidden");
   printBtnText.classList.add("visually-hidden");
+}
+
+async function handleQrInput(e) {
+  const qrFile = e.target.files[0];
+  if (!qrFile) return;
+
+  const qrFileReader = new FileReader();
+  qrFileReader.addEventListener("load", () => {
+    qrCodeDataUrl = qrFileReader.result;
+    fileInput.value = undefined;
+  });
+  qrFileReader.readAsDataURL(qrFile);
 }
 
 async function handleFileAsync(e) {
@@ -95,7 +110,11 @@ function generateBill(billData) {
     true
   );
 
-  invoiceHtmlElement.append(
+  const qrCodeImgTag = document.createElement("img");
+  qrCodeImgTag.classList.add("qr_code");
+  qrCodeImgTag.src = qrCodeDataUrl ?? "#";
+
+  const invoiceElements = [
     nameHtmlElement,
     dateHtmlElement,
     milkQtHtmlElement,
@@ -107,8 +126,11 @@ function generateBill(billData) {
     pendingTxtHtmlElement,
     pendingValHtmlElement,
     totalTxtHtmlElement,
-    totalValHtmlElement
-  );
+    totalValHtmlElement,
+    qrCodeDataUrl && qrCodeImgTag,
+  ].filter(Boolean);
+
+  invoiceHtmlElement.append(...invoiceElements);
   return invoiceHtmlElement;
 }
 
@@ -127,8 +149,9 @@ async function generatePdf(invoiceListHtml) {
     .from(invoiceListHtml)
     .save();
 
-  fileInput.value = "";
-  datePicker.value = "";
+  qrInput.value = undefined;
+  fileInput.value = undefined;
+  datePicker.value = undefined;
   enableState();
 }
 

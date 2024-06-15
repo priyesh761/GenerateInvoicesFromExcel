@@ -8,12 +8,12 @@
   display: grid;
   box-sizing: border-box;
   grid-template-areas:
-    "name name date"
-    "milk_lbl milk_lbl milk_amt"
-    "rate_lbl rate_lbl rate_amt"
-    "bill_lbl bill_lbl bill_amt"
-    "pending_lbl pending_lbl pending_amt"
-    "total_lbl total_lbl total_amt";
+    "name name name name date"
+    "qr_code qr_code milk_lbl milk_lbl milk_amt"
+    "qr_code qr_code rate_lbl rate_lbl rate_amt"
+    "qr_code qr_code bill_lbl bill_lbl bill_amt"
+    "qr_code qr_code pending_lbl pending_lbl pending_amt"
+    "qr_code qr_code total_lbl total_lbl total_amt";
 }
 .name {
   grid-area: name;
@@ -50,4 +50,8 @@
 }
 .total_amt {
   grid-area: total_amt;
+}
+.qr_code {
+  grid-area: qr_code;
+  height: 200px;
 }

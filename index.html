@@ -31,9 +31,15 @@
   <body>
     <div class="container-sm">
       <div class="row justify-content-center input-group align-items-center g-3 my-5">
-        <div class="col-3 mr-1"><input class="form-control" type="date" id="datePicker" name="date" /></div>
-        <div class="col-5 mr-1">
-          <label class="input-group-text visually-hidden" for="xlFile">Excel file input</label>
+        <div class="col-2 mr-1">
+          <input class="form-control align-self-bottom" type="date" id="datePicker" name="date" />
+        </div>
+        <div class="col-3 mr-1">
+          <label class="form-label" for="qrCode">QR Code (Optional)</label>
+          <input type="file" class="form-control" id="qrCode" accept="image/png, image/jpeg, image/jpg" />
+        </div>
+        <div class="col-3 mr-1">
+          <label class="form-label" for="xlFile">Excel file input</label>
           <input
             type="file"
             class="form-control"
