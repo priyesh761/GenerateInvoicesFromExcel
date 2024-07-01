@@ -10,15 +10,12 @@ const printBtn = document.querySelector("#printBtn");
 const printBtnText = printBtn.querySelector("#btnTxt");
 const printBtnSpinner = printBtn.querySelector("#btnLoading");
 const fileInput = document.querySelector("#xlFile");
-const qrInput = document.querySelector("#qrCode");
 const datePicker = document.querySelector("#datePicker");
 const invoiceListHtml = document.querySelector("#contentToPrint");
-let qrCodeDataUrl = undefined;
 
 const date = new Date();
 enableState(true);
 fileInput.addEventListener("change", handleFileAsync, false);
-qrInput.addEventListener("change", handleQrInput);
 
 function enableState(disabled = false) {
   printBtn.disabled = disabled;
@@ -30,18 +27,6 @@ function loadingState() {
   printBtn.disabled = true;
   printBtnSpinner.classList.remove("visually-hidden");
   printBtnText.classList.add("visually-hidden");
-}
-
-async function handleQrInput(e) {
-  const qrFile = e.target.files[0];
-  if (!qrFile) return;
-
-  const qrFileReader = new FileReader();
-  qrFileReader.addEventListener("load", () => {
-    qrCodeDataUrl = qrFileReader.result;
-    fileInput.value = "";
-  });
-  qrFileReader.readAsDataURL(qrFile);
 }
 
 async function handleFileAsync(e) {
@@ -68,7 +53,7 @@ function generateBillPage(billPageData) {
       const pageIndex = Math.floor(index / 8);
       if (!result[pageIndex]) {
         const page = document.createElement("div");
-        page.classList.add("invoice-page");
+        page.classList.add("html2pdf__page-break", "invoice-page");
         result[pageIndex] = page;
       }
       result[pageIndex].append(item);
@@ -110,11 +95,7 @@ function generateBill(billData) {
     true
   );
 
-  const qrCodeImgTag = document.createElement("img");
-  qrCodeImgTag.classList.add("qr_code");
-  qrCodeImgTag.src = qrCodeDataUrl ?? "#";
-
-  const invoiceElements = [
+  invoiceHtmlElement.append(
     nameHtmlElement,
     dateHtmlElement,
     milkQtHtmlElement,
@@ -126,11 +107,8 @@ function generateBill(billData) {
     pendingTxtHtmlElement,
     pendingValHtmlElement,
     totalTxtHtmlElement,
-    totalValHtmlElement,
-    qrCodeDataUrl && qrCodeImgTag,
-  ].filter(Boolean);
-
-  invoiceHtmlElement.append(...invoiceElements);
+    totalValHtmlElement
+  );
   return invoiceHtmlElement;
 }
 
@@ -138,9 +116,8 @@ async function generatePdf(invoiceListHtml) {
   loadingState();
   await html2pdf()
     .set({
-      margin: [1, 5],
+      mode: ["legacy"],
       filename: `Milk_Invoice_${date.toLocaleDateString()}_${date.toLocaleTimeString()}.pdf`,
-      pagebreak: { avoid: ".invoice-page" },
       jsPDF: {
         orientation: "p",
         format: "a4",
@@ -149,7 +126,6 @@ async function generatePdf(invoiceListHtml) {
     .from(invoiceListHtml)
     .save();
 
-  qrInput.value = "";
   fileInput.value = "";
   datePicker.value = "";
   enableState();
@@ -163,6 +139,12 @@ function generateTextDiv(content = "", classList = [], bold = false) {
   divElement.appendChild(bold ? boldTextelement : textElement);
   divElement.classList.add("p-2", "border", "border-1", ...classList);
   return divElement;
+}
+
+function generatePageBreak() {
+  const pageBreakDiv = document.createElement("div");
+  pageBreakDiv.classList.add("html2pdf__page-break invoice-page");
+  return pageBreakDiv;
 }
 
 function comparePropertyCaseInsensitive(obj, key) {
