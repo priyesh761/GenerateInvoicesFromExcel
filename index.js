@@ -10,12 +10,16 @@ const printBtn = document.querySelector("#printBtn");
 const printBtnText = printBtn.querySelector("#btnTxt");
 const printBtnSpinner = printBtn.querySelector("#btnLoading");
 const fileInput = document.querySelector("#xlFile");
+const qrInput = document.querySelector("#qrCode");
 const datePicker = document.querySelector("#datePicker");
 const invoiceListHtml = document.querySelector("#contentToPrint");
+let qrCodeDataUrl = undefined;
 
 const date = new Date();
+const cardPerPage = 8;
 enableState(true);
 fileInput.addEventListener("change", handleFileAsync, false);
+qrInput.addEventListener("change", handleQrInput);
 
 function enableState(disabled = false) {
   printBtn.disabled = disabled;
@@ -27,6 +31,18 @@ function loadingState() {
   printBtn.disabled = true;
   printBtnSpinner.classList.remove("visually-hidden");
   printBtnText.classList.add("visually-hidden");
+}
+
+async function handleQrInput(e) {
+  const qrFile = e.target.files[0];
+  if (!qrFile) return;
+
+  const qrFileReader = new FileReader();
+  qrFileReader.addEventListener("load", () => {
+    qrCodeDataUrl = qrFileReader.result;
+    fileInput.value = "";
+  });
+  qrFileReader.readAsDataURL(qrFile);
 }
 
 async function handleFileAsync(e) {
@@ -50,7 +66,7 @@ function generateBillPage(billPageData) {
   return billPageData
     .map((billData) => generateBill(billData))
     .reduce((result, item, index) => {
-      const pageIndex = Math.floor(index / 8);
+      const pageIndex = Math.floor(index / cardPerPage);
       if (!result[pageIndex]) {
         const page = document.createElement("div");
         page.classList.add("html2pdf__page-break", "invoice-page");
@@ -95,7 +111,11 @@ function generateBill(billData) {
     true
   );
 
-  invoiceHtmlElement.append(
+  const qrCodeImgTag = document.createElement("img");
+  qrCodeImgTag.classList.add("qr_code");
+  qrCodeImgTag.src = qrCodeDataUrl ?? "#";
+
+  const invoiceElements = [
     nameHtmlElement,
     dateHtmlElement,
     milkQtHtmlElement,
@@ -107,8 +127,11 @@ function generateBill(billData) {
     pendingTxtHtmlElement,
     pendingValHtmlElement,
     totalTxtHtmlElement,
-    totalValHtmlElement
-  );
+    totalValHtmlElement,
+    qrCodeDataUrl && qrCodeImgTag,
+  ].filter(Boolean);
+
+  invoiceHtmlElement.append(...invoiceElements);
   return invoiceHtmlElement;
 }
 
@@ -126,6 +149,7 @@ async function generatePdf(invoiceListHtml) {
     .from(invoiceListHtml)
     .save();
 
+  qrInput.value = "";
   fileInput.value = "";
   datePicker.value = "";
   enableState();
